@@ -397,8 +397,45 @@ jdk1.6之后对synchronized进行了优化，引入了
 锁中存在四个状态: 无锁状态、偏向锁状态、轻量级锁状态、重量级锁状态
 ```
 #### spring
-
+- bean的作用域
+1. singleton 单例，spring中默认单例
+2. prototype 每次请求都会创建一个新的bean实例
+3. request 每一次HTTP请求都会产生一个新的 bean，该 bean 仅在当前 HTTP request 内有效
+4. session 每一次HTTP请求都会产生一个新的 bean，该 bean 仅在当前 HTTP session 内有效
 - bean的生命周期
+1. 实例化 Instantiation
+2. 属性值赋值 Populate
+3. 初始化 Initialization
+4. 销毁 Destruction
+```text
+protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args) throws BeanCreationException {
+    BeanWrapper instanceWrapper = null;
+    if (mbd.isSingleton()) {
+        instanceWrapper = (BeanWrapper)this.factoryBeanInstanceCache.remove(beanName);
+    }
+
+    if (instanceWrapper == null) {
+    	// 实例化阶段
+        instanceWrapper = this.createBeanInstance(beanName, mbd, args);
+    }
+
+    ...
+
+    Object exposedObject = bean;
+
+    try {
+    	// 属性赋值阶段
+        this.populateBean(beanName, mbd, instanceWrapper);
+        // 初始化阶段
+        exposedObject = this.initializeBean(beanName, exposedObject, mbd);
+    } catch (Throwable var18) {
+        ...
+    }
+
+    ...
+}
+```
+![](bean_life.png)
 - spring如何解决循环依赖
 - spring的事务实现原理
 - spring中多例如何实现
