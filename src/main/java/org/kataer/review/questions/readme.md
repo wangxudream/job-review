@@ -514,11 +514,36 @@ https://www.jianshu.com/p/ace3cd6526c4
 ```
 
 - mysql日志的作用
-
-1. binlog
-2. undolog
-3. redolog
-4. replaylog
+```text
+https://www.cnblogs.com/myseries/p/10728533.html
+```
+1. redo log 重做日志
+```text
+确保事务的持久性。redo log 记录事务执行后的状态，用来恢复未写入data file的已成功的事务更新的数据
+服务发生故障重启后，根据redo log进行重做，达到事务的持久性
+```
+```text
+物理格式的日志，记录的是物理数据页面的修改的信息，其redo log是顺序写入redo log file的物理文件中去的
+事务开始之后就产生redo log，redo log的落盘并不是随着事务的提交才写入的，而是在事务的执行过程中，便开始写入redo log文件中
+当对应事务的脏页写入到磁盘之后，redo log的使命也就完成了，重做日志占用的空间就可以重用（被覆盖）
+```
+2. undo log 回滚日志
+```text
+保证事务的原子性，保存了事务发生前的一系列数据，可用于回滚
+同时提供mvcc的多版本读，非锁定读(read view)
+```
+3. bin log 二进制日志
+```text
+用于主从复制
+```
+4. error log 错误日志
+5. slow query log 慢查询日志
+```text
+show status like “%slow_queries%”;
+show variables like “%slow%”;
+```
+6. relay log 中继日志
+7. general log
 
 - 索引失效的场景
 
