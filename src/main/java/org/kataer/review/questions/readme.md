@@ -3,15 +3,42 @@
 #### java基础
 
 - HashMap的内部实现和扩容
+
 ```text
 数组+链表|红黑树的形式
 
 ```
+
 - 双亲委派模型
+- ThreadLocal
+
+```java
+//线程私有变量
+//ThreadLocal的内部类ThreadLocalMap,Entry的key为ThreadLocal,value为设置的值
+static class ThreadLocalMap {
+  
+  static class Entry extends WeakReference<ThreadLocal<?>> {
+    Object value;
+
+    Entry(ThreadLocal<?> k, Object v) {
+      super(k);
+      value = v;
+    }
+  }
+}
+//Thread 内部有ThreadLocal.ThreadLocalMap
+```
+- ThreadLocal内存溢出情况
+```text
+ThreadLocalMap的entry的key为ThreadLocal对象，其为弱引用，
+弱引用会被回收，会存在key为null，value存在额情况，假如线程长期存在会导致内存溢出
+```
 - synchronized的原理
+
 ```text
 变成重量级锁之后利用的是monitorEnter和monitorExit
 ```
+
 - 线程池的参数和任务提交流程
 
 ###### 线程池参数
@@ -111,7 +138,9 @@ else if(!addWorker(command,false)){
   reject(command);
 }
 ```
+
 ###### 线程过期时间判断
+
 ```text
 如果发生了以下四件事中的任意一件，那么Worker需要被回收：
 
@@ -123,11 +152,15 @@ Worker个数比线程池最大大小要大
 
 使用超时时间从阻塞队列里拿数据，并且超时之后没有拿到数据(allowCoreThreadTimeOut || workerCount > corePoolSize)
 ```
+
 ###### 参考资料
+
 ```text
 https://www.jianshu.com/p/a80882853b35
 ```
+
 - 线程的状态
+
 ```text
 NEW 线程对象被创建，但是没有调用start方法
 RUNNABLE 将操作系统的就绪和运行状态统称为RUNNABLE
@@ -136,84 +169,90 @@ WAITING join/wait/park
 TIME_WAITING join()/wait()/park()
 TERMINATED 执行完任务
 ```
+
 ```java
  public enum State {
-        /**
-         * Thread state for a thread which has not yet started.
-         */
-        NEW,
+  /**
+   * Thread state for a thread which has not yet started.
+   */
+  NEW,
 
-        /**
-         * Thread state for a runnable thread. 
-         */
-        RUNNABLE,
+  /**
+   * Thread state for a runnable thread. 
+   */
+  RUNNABLE,
 
-        /**
-         * 等待monitor lock 
-         * 调用 synchronized,IO等操作
-         * Thread state for a thread blocked waiting for a monitor lock.
-         * A thread in the blocked state is waiting for a monitor lock
-         * to enter a synchronized block/method or
-         * reenter a synchronized block/method after calling
-         */
-        BLOCKED,
+  /**
+   * 等待monitor lock 
+   * 调用 synchronized,IO等操作
+   * Thread state for a thread blocked waiting for a monitor lock.
+   * A thread in the blocked state is waiting for a monitor lock
+   * to enter a synchronized block/method or
+   * reenter a synchronized block/method after calling
+   */
+  BLOCKED,
 
-        /**
-         * 调用object.wait()/Thread.join()/LockSupport#park()
-         * Thread state for a waiting thread.
-         * A thread is in the waiting state due to calling one of the
-         * following methods:
-         * <ul>
-         *   <li>{@link Object#wait() Object.wait} with no timeout</li>
-         *   <li>{@link #join() Thread.join} with no timeout</li>
-         *   <li>{@link LockSupport#park() LockSupport.park}</li>
-         * </ul>
-         *
-         * <p>A thread in the waiting state is waiting for another thread to
-         * perform a particular action.
-         *
-         * For example, a thread that has called <tt>Object.wait()</tt>
-         * on an object is waiting for another thread to call
-         * <tt>Object.notify()</tt> or <tt>Object.notifyAll()</tt> on
-         * that object. A thread that has called <tt>Thread.join()</tt>
-         * is waiting for a specified thread to terminate.
-         */
-        WAITING,
+  /**
+   * 调用object.wait()/Thread.join()/LockSupport#park()
+   * Thread state for a waiting thread.
+   * A thread is in the waiting state due to calling one of the
+   * following methods:
+   * <ul>
+   *   <li>{@link Object#wait() Object.wait} with no timeout</li>
+   *   <li>{@link #join() Thread.join} with no timeout</li>
+   *   <li>{@link LockSupport#park() LockSupport.park}</li>
+   * </ul>
+   *
+   * <p>A thread in the waiting state is waiting for another thread to
+   * perform a particular action.
+   *
+   * For example, a thread that has called <tt>Object.wait()</tt>
+   * on an object is waiting for another thread to call
+   * <tt>Object.notify()</tt> or <tt>Object.notifyAll()</tt> on
+   * that object. A thread that has called <tt>Thread.join()</tt>
+   * is waiting for a specified thread to terminate.
+   */
+  WAITING,
 
-        /**
-         * Thread state for a waiting thread with a specified waiting time.
-         * A thread is in the timed waiting state due to calling one of
-         * the following methods with a specified positive waiting time:
-         * <ul>
-         *   <li>{@link #sleep Thread.sleep}</li>
-         *   <li>{@link Object#wait(long) Object.wait} with timeout</li>
-         *   <li>{@link #join(long) Thread.join} with timeout</li>
-         *   <li>{@link LockSupport#parkNanos LockSupport.parkNanos}</li>
-         *   <li>{@link LockSupport#parkUntil LockSupport.parkUntil}</li>
-         * </ul>
-         */
-        TIMED_WAITING,
+  /**
+   * Thread state for a waiting thread with a specified waiting time.
+   * A thread is in the timed waiting state due to calling one of
+   * the following methods with a specified positive waiting time:
+   * <ul>
+   *   <li>{@link #sleep Thread.sleep}</li>
+   *   <li>{@link Object#wait(long) Object.wait} with timeout</li>
+   *   <li>{@link #join(long) Thread.join} with timeout</li>
+   *   <li>{@link LockSupport#parkNanos LockSupport.parkNanos}</li>
+   *   <li>{@link LockSupport#parkUntil LockSupport.parkUntil}</li>
+   * </ul>
+   */
+  TIMED_WAITING,
 
-        /**
-         * Thread state for a terminated thread.
-         * The thread has completed execution.
-         */
-        TERMINATED;
-    }
+  /**
+   * Thread state for a terminated thread.
+   * The thread has completed execution.
+   */
+  TERMINATED;
+}
 ```
+
 - 1.8的新特性
 - 什么时候会发生栈溢出
+
 ```text
 递归没有终止条件
 创建线程时无法分配足够的栈内存
 ```
+
 - IO和NIO
+
 ```text
 https://zhuanlan.zhihu.com/p/23488863
 https://blog.csdn.net/u011381576/article/details/79876754
 ```
 
 - AQS原理
+
 ```text
 基于CAS来实现
 
@@ -222,8 +261,9 @@ https://blog.csdn.net/u011381576/article/details/79876754
 status表示锁的持有状态、head和tail组成同步队列
 要将ReentrantLock
 ```
+
 ```java
-public abstract class AbstractQueuedSynchronizer{
+public abstract class AbstractQueuedSynchronizer {
   //LCH的头节点
   private transient volatile Node head;
   //LCH的尾节点
@@ -267,7 +307,7 @@ public abstract class AbstractQueuedSynchronizer{
    * @return node's predecessor
    */
   private Node enq(final Node node) {
-    for (;;) {
+    for (; ; ) {
       Node t = tail;
       if (t == null) { // Must initialize
         if (compareAndSetHead(new Node()))
@@ -292,7 +332,7 @@ public abstract class AbstractQueuedSynchronizer{
     boolean failed = true;
     try {
       boolean interrupted = false;
-      for (;;) {//死循环
+      for (; ; ) {//死循环
         final Node p = node.predecessor();//获得该node的前置节点
         /**
          * 如果前置节点是head，表示之前的节点就是正在运行的线程，表示是第一个排队的
@@ -334,33 +374,43 @@ public abstract class AbstractQueuedSynchronizer{
       nextOffset = unsafe.objectFieldOffset
           (Node.class.getDeclaredField("next"));
 
-    } catch (Exception ex) { throw new Error(ex); }
-  } 
+    } catch (Exception ex) {
+      throw new Error(ex);
+    }
+  }
 }
 ```
+
 - 线程安全
+
 ```text
 原子性
 可见性
 有序性
 ```
+
 #### jvm
 
 - jvm内存布局
 - java对象布局
+
 ```text
 java对象分为三部分，所占内存大小为8byte的整数倍，最小对象为16byte
 ObjectHead(对象头,包括mark word、klass point) 
 InstanceData(实例数据)
 Padding(对其填充)
 ```
+
 1. mark word
+
 ```text
 分为MarkWord(8byte)、KlassPoint(4byte)、Length Filed
 MarkWord 分为HashCode、分代年龄、偏向锁标志、锁标志、锁信息
 ```
+
 ![](object_head.png)
 ![](object_head_64.png)
+
 ```text
 虽然它们在不同位数的JVM中长度不一样，但是基本组成内容是一致的。
 
@@ -373,18 +423,24 @@ epoch：偏向锁在CAS锁操作过程中，偏向性标识，表示对象更偏
 ptr_to_lock_record：轻量级锁状态下，指向栈中锁记录的指针。当锁获取是无竞争的时，JVM使用原子操作而不是OS互斥。这种技术称为轻量级锁定。在轻量级锁定的情况下，JVM通过CAS操作在对象的标题字中设置指向锁记录的指针。
 ptr_to_heavyweight_monitor：重量级锁状态下，指向对象监视器Monitor的指针。如果两个不同的线程同时在同一个对象上竞争，则必须将轻量级锁定升级到Monitor以管理等待的线程。在重量级锁定的情况下，JVM在对象的ptr_to_heavyweight_monitor设置指向Monitor的指针。
 ```
+
 2. Klass point
+
 ```text
 即类型指针，是对象指向它的类元数据的指针，虚拟机通过这个指针来确定这个对象是哪个类的实例。
 ```
+
 3. 实例数据
 4. 对齐填充
+
 ```text
 所有的对象分配的字节总SIZE需要是8的倍数，如果前面的对象头和实例数据占用的总SIZE不满足要求，则通过对齐数据来填满。
 需要对齐是cpu缓存行的原因，假如一个数据跨缓存行，会影响程序的运行效率（缓存一致性协议）
 ```
+
 - 锁升级
-[参考资料](https://cloud.tencent.com/developer/article/1698812?from=article.detail.1633997)
+  [参考资料](https://cloud.tencent.com/developer/article/1698812?from=article.detail.1633997)
+
 ```text
 jdk1.6之后对synchronized进行了优化，引入了
 偏向锁
@@ -396,17 +452,23 @@ jdk1.6之后对synchronized进行了优化，引入了
 轻量级锁
 锁中存在四个状态: 无锁状态、偏向锁状态、轻量级锁状态、重量级锁状态
 ```
+
 #### spring
+
 - bean的作用域
+
 1. singleton 单例，spring中默认单例
 2. prototype 每次请求都会创建一个新的bean实例
 3. request 每一次HTTP请求都会产生一个新的 bean，该 bean 仅在当前 HTTP request 内有效
 4. session 每一次HTTP请求都会产生一个新的 bean，该 bean 仅在当前 HTTP session 内有效
+
 - bean的生命周期
+
 1. 实例化 Instantiation
 2. 属性值赋值 Populate
 3. 初始化 Initialization
 4. 销毁 Destruction
+
 ```text
 protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable Object[] args) throws BeanCreationException {
     BeanWrapper instanceWrapper = null;
@@ -435,7 +497,9 @@ protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable
     ...
 }
 ```
+
 ![](bean_life.png)
+
 - spring如何解决循环依赖
 - spring的事务实现原理
 - spring中多例如何实现
@@ -444,10 +508,20 @@ protected Object doCreateBean(String beanName, RootBeanDefinition mbd, @Nullable
 #### 数据库
 
 - B树和B+树
+
 ```text
 https://www.jianshu.com/p/ace3cd6526c4
 ```
+
+- mysql日志的作用
+
+1. binlog
+2. undolog
+3. redolog
+4. replaylog
+
 - 索引失效的场景
+
 ```text
 1、索引字段参与计算或有函数
 2、不满足最左匹配原则
@@ -458,24 +532,32 @@ https://www.jianshu.com/p/ace3cd6526c4
 7、not in , not exist
 具体情况具体分析，数据库会对sql进行优化
 ```
+
 - explain的使用
+
 ```text
 主要关注type、possible_key、key
 ```
+
 - 聚簇索引和普通索引的区别
+
 ```text
 聚簇索引是唯一索引、一个表只有一个聚簇索引、叶子节点存储行数据
 一个表可以有多个普通索引，普通索引的叶子节点存储的是主键的值
 假如设置了主键，则使用主键作为聚簇索引、否则以表中的某个唯一索引作为聚簇索引
 如没有唯一索引，则innodb自己生成一个聚簇索引
 ```
+
 - 行锁和表锁什么时候发生
 - MVCC(并发版本控制)
+
 ```text
 https://www.php.cn/mysql-tutorials-460111.html
 ```
+
 - ACID(事务的特性)
 - 事务的隔离级别
+
 ```text
 read unCommit
 read commit
@@ -488,13 +570,16 @@ repeatable read
 - redis分布式锁的实现原理
 - redis哨兵模式如何实现主从替换
 - redis的底层数据结构
+
 1. 简单动态字符串
 2. 链表
 3. 跳跃表
 4. 整数集合
 5. 压缩列表
 6. 快速列表
+
 - redis缓存淘汰算法
+
 ```text
 FIFO 先进先出
 LRU 最近最久未使用
@@ -507,9 +592,11 @@ ALL-KEYS—RANDOM 随机
 - 消息堆积如何处理
 - 如何避免重复消费
 - 如何保证消息顺序消费
+
 ```text
 全局有序和分区有序
 ```
+
 - 如何处理死信
 
 #### 微服务
@@ -518,11 +605,13 @@ ALL-KEYS—RANDOM 随机
 - 服务熔断和降级如何实现
 - Dubbo和springCloud
 - Gateway的作用
+
 1. 负载均衡
 2. 限流
 3. 鉴权相关(权限控制、黑白名单、授权)
 4. 跨域问题处理
 5. 日志拦截
+
 - Spring Gateway中的filter
 
 ```text
@@ -532,16 +621,19 @@ ALL-KEYS—RANDOM 随机
    但是效率相对差些
 4、Dubbo采用自定义的Dubbo协议实现远程通信，是一种典型的RPC调用方案，而SpringCloud中使用的Feign是基于Rest风格的调用方式。
 ```
+
 - 网关的作用
 - 网关由哪些filter
 
 #### 网络通讯
+
 - tcp握手和挥手
 - tcp和udp的区别
 - http和https的区别
 - 跨域问题
 - session、cookie、token 区别
 - Websocket机制
+
 ```text
 Websocket是单个Tcp连接上进行全双工通讯的协议
 基于Http协议完成握手(Get请求,能添加query参数,可用于鉴别身份)
@@ -566,13 +658,17 @@ Connection: Upgrade
 Sec-WebSocket-Accept: HSmrc0sMlYUkAGmm5OPpG2HaGWk=
 Sec-WebSocket-Protocol: chat
 ```
+
 - 单工|半双工|全双工
+
 ```text
 单工 消息只能单向传输
 半双工 同一时刻只能有一个发消息
 全双工 双方能同时发消息
 ```
+
 - Base64作用
+
 ```text
 ascii的128～255是不可见字符
 因为不同的设备对字符的处理方式有些不同，所以为了防止数据被错误处理，先将数据做base64编码
@@ -580,13 +676,17 @@ ascii的128～255是不可见字符
 使用场景:
 http证书的传递、邮件传递
 ```
-- 签名|加密算法
-1、签名算法
+
+- 签名|加密算法 1、签名算法
+
 ```text
 MD5、SHA-1
 ```
+
 2、加密算法
+
 ##### 对称加密
+
 ```
 对称加密 AES、DES、3DES
 ES、DES、3DES都是对称的块加密算法，加解密的过程是可逆的。
@@ -601,7 +701,9 @@ AES 加密算法是密码学中的高级加密标准，
 算法应易于各种硬件和软件实现。
 这种加密算法是美国联邦政府采用的 区块加密标准。
 ```
+
 ##### 非对称加密
+
 ```text
 RSA算法
 RSA 加密算法 基于一个十分简单的数论事实：
@@ -610,10 +712,9 @@ RSA 加密算法 基于一个十分简单的数论事实：
 
 ECC算法
 ```
-- 摘要算法和加密算法效率
-MD5>SHA-1
-AES>DES>3DES
-RSA>ECC
+
+- 摘要算法和加密算法效率 MD5>SHA-1 AES>DES>3DES RSA>ECC
+
 #### 数据结构和算法
 
 - 红黑树和二叉树的区别
@@ -623,9 +724,25 @@ RSA>ECC
 - 单例模式实现
 
 #### 运维部署
+
+- DockerFile
+
+```text
+FROM openjdk:8-jre-alpine
+
+RUN echo 'Asia/Shanghai' > /etc/timezone
+#captche 字体包
+RUN set -xe \
+&& apk --no-cache add ttf-dejavu fontconfig
+COPY start/target/start-1.0.0.jar /opt/api.jar
+WORKDIR /opt
+CMD ["java", "-jar", "api.jar"]
+```
+
 - 蓝绿发布
 - 灰度发布
 - 滚动发布
 
 #### 场景题
+
 - 如何实现消息的验签和重放
