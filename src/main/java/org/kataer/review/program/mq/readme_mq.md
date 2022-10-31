@@ -77,7 +77,7 @@ https://zhuanlan.zhihu.com/p/423309452
 
 2. 性能对比
 ```text
-kafka单机写入在17w/s高于RocketMQ，消息在10K
+kafka吞吐量达到百万级别高于RocketMQ(10W)，消息在10K
 ```
 > Kafka的Producer端会将小消息合并发送至broker
 
@@ -115,3 +115,17 @@ Consumer的集群规模和队列数成正比，队列越多，Consumer集群可�
 
 8. RocketMQ 特有特性
 > RocketMQ 支持消息重试、定时消息、消息查询、分布式事务消息、消息轨迹、消息过滤(tag)
+
+9.总结
+```text
+1.RocketMQ是根据Kafka的架构原型设计出来的，增加了一些很有用的功能
+2.Kafka是用Catlin实现的，RocketMQ则是阿里使用Java实现的
+3.Kafka的优点在于TPS更高，缺点则是当分区达到64以上时，性能会有明显下降
+4.RocketMQ的优点在于支持更多的Topic和messageQueue而对性能没有影响，
+  数据的可靠性方面优于Kafka，且提供了消息重试、定时消息、消息查询、消息轨迹、消息过滤等实用功能
+5.Kafka性能强于RocketMQ主要源于Kafka的producer会合并消息发送，减少IO次数,采用定时刷盘，写入非常高效
+  消息可靠性方面的差异主要源自两者刷盘模式的不同，Kafka支持异步刷盘、异步Replication，而RocketMQ还支持同步刷盘，同步Replication
+  分区高导致Kafka性能下降主要原因是因为kafka每个分区对应一个文件，分区多了之后相当于又变成了随机写的模式
+  rocketMQ因为所有消息数据都存储在CommitLog中，messageQueue中只存储了(CommitLog Offset + Size + Message Tag Hashcode)
+  一共20个字节，pageCache写入磁盘的次数相对减少
+```
