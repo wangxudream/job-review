@@ -12,7 +12,7 @@
 BTree是balance tree的简称
 叶子节点从左到右升序排序
 ```
-![img.png](img.png)
+![img.png](b+tree.png)
 #### 聚簇索引
 ```text
 叶子节点存储完整数据的为聚簇索引
@@ -30,4 +30,12 @@ BTree是balance tree的简称
 2、解析成中继日志relay log
 3、读取中继日志回放主服务器执行过的sql
 ```
-![img_1.png](img_1.png)
+![img_1.png](master_slave.png)
+#### SQL执行过程
+![img_2.png](mysql_server.png)
+> 客户端->解析器->预处理器->优化器->执行器->存储引擎
+1. 查询缓存，命中缓存则返回结果
+2. 语法解析，生成解析树
+3. 优化器优化，生成执行计划
+4. 执行器调用存储引擎API来执行查询
+5. 返回结果给客户端，缓存查询结果
