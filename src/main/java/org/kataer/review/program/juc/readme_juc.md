@@ -18,7 +18,7 @@ isHeldExclusively
 Head和Tail表示CLH的头节点和尾节点
 ```
 
-##### 源码解析
+###### 源码解析
 
 >
 
@@ -231,3 +231,38 @@ public abstract class AbstractQueuedSynchronizer
 ```java
 
 ```
+
+##### ReentrantLock 解析
+
+###### 公平锁和非公平锁
+
+> 非公平锁会直接竞争锁(可能先于队列中的线程获得锁)
+> 公平锁会判断clh队列中是否有等待更久的线程，有则直接加入队列末尾，否则直接竞争锁
+
+```text
+非公平锁lock中直接compareAndSet(),失败了则调用acquire方法
+公平锁直接调用acquire方法，tryAcquire方法中会判断队列中是否有等待的其它线程
+```
+![](fire_lock.png)
+##### 线程安全的实现方式
+> 互斥同步 锁机制(Lock,synchronized)
+> 非阻塞同步 CAS、Atomic***
+> 无同步方案 栈封闭、ThreadLocal、可重入代码
+
+##### Lock和synchronized区别
+- synchronized是JVM实现的，Lock是java代码实现的
+- synchronized优化后性能大致和ReentrantLock相同
+- ReentrantLock可中断，synchronized不行
+- ReentrantLock实现了公平锁，synchronized不是公平锁
+- synchronized不需要主动释放
+> 除非使用Lock的高级功能，否则使用原生的synchronized
+##### JUC下有哪些部分
+- Lock
+- Atomic
+- current Collections
+- tools 
+- executor
+###### CAS的弊端
+- ABA问题
+- 自旋过久浪费CPU资源
+- 只能对一个变量执行加锁操作，无法对多个变量执行原子操作(使用锁)
